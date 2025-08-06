@@ -29,7 +29,7 @@ chocolates = [
 def get_chocolates():
     return jsonify(chocolates)
 
-@app.route('/seconddev', methods=['GET'])
+@app.route('/second', methods=['GET'])
 def dev_second():
     return "Hello I am second Dev."
 
