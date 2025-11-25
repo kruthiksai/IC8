@@ -21,9 +21,9 @@ pipeline {
             steps {
                 sh '''
                     cd $WORKSPACE
-                    pkill -f app.py || echo "No running Flask app"
+                    sudo pkill -f app.py || echo "No running Flask app"
 
-                    nohup python3 app.py > flask.log 2>&1 &
+                    sudo nohup python3 app.py > flask.log 2>&1 &
                 '''
             }
         }
