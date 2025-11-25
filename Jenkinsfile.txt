@@ -1,55 +1,30 @@
 pipeline {
-    agent any
+    agent { label 'DevServer' }
 
     stages {
         stage('Checkout') {
             steps {
-                sshagent(['ubuntu']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@54.152.217.31 <<EOF
-if [ ! -d "repo" ]; then
-    git clone https://github.com/kruthiksai/IC8 repo
-else
-    echo "Repository already exists."
-    cd repo
-    git pull
-fi
-EOF
-                    '''
-                }
+                git branch: 'main', url: 'https://github.com/kruthiksai/IC8'
             }
         }
-        
+
         stage('Install Dependencies') {
             steps {
-                sshagent(['ubuntu']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@54.152.217.31 <<EOF
-sudo apt update
-sudo apt install -y python3-flask
-sudo apt install -y python3-flask-cors
-EOF
-                    '''
-                }
+                sh '''
+                    sudo apt update
+                    sudo apt install -y python3-flask python3-flask-cors
+                '''
             }
         }
-        
-        stage('Build and Run') {
+
+        stage('Run Flask App') {
             steps {
-                sshagent(['ubuntu']) {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@54.152.217.31 <<EOF
-cd repo
+                sh '''
+                    cd $WORKSPACE
+                    pkill -f app.py || echo "No running Flask app"
 
-# Stop any running Flask app instance
-sudo pkill -f "app.py" || echo "Flask app is not running."
-
-# Start the Flask app in the background
-sudo nohup python3 app.py > nohup.out 2>&1 &
-disown
-EOF
-                    '''
-                }
+                    nohup python3 app.py > flask.log 2>&1 &
+                '''
             }
         }
     }
